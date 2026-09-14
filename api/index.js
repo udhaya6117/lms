@@ -16,6 +16,25 @@ try {
 
 let ready;
 
+const restoreApiUrl = (req) => {
+  const raw = req.url || '/';
+  try {
+    const parsed = new URL(raw, 'http://localhost');
+    const nested = parsed.searchParams.get('__path');
+    if (nested) {
+      parsed.searchParams.delete('__path');
+      const search = parsed.searchParams.toString();
+      req.url = `/api/${nested}${search ? `?${search}` : ''}`;
+      return;
+    }
+  } catch {
+    // keep the incoming url
+  }
+  if (!String(req.url || '').startsWith('/api')) {
+    req.url = `/api${raw.startsWith('/') ? raw : `/${raw}`}`;
+  }
+};
+
 const sendError = (res, err) => {
   if (res.headersSent) return;
   res.statusCode = 500;
@@ -35,6 +54,7 @@ module.exports = async (req, res) => {
   }
 
   try {
+    restoreApiUrl(req);
     assertProductionSecrets();
     if (!ready) {
       ready = connectDb({ skipSeed: process.env.SEED_ON_EMPTY !== 'true' });
