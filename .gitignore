@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+!.env.example
+backend/.env
+frontend/.env
+*.log
+*.pem
+*.key
+credentials.json
+.DS_Store
+coverage/
+.vscode/
+uploads/
