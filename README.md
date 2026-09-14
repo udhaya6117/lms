@@ -235,10 +235,6 @@ Supporting collections used by the extra learning-path features: `categories`, `
 - `authorize(...roles)` enforces role. **Ownership is checked in controllers** (a trainer can only mutate their own courses; an admin can manage all).
 - Frontend `ProtectedRoute` is UX only. Every mutating API still checks role and ownership.
 
-## Developer flow (APIs + error codes)
-
-See **[FLOW.md](./FLOW.md)** for end-to-end sequences, request bodies, and every error status the API returns.
-
 ## API details
 
 All JSON responses use:
