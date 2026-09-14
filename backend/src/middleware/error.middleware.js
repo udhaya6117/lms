@@ -40,12 +40,14 @@ const errorHandler = (err, req, res, next) => {
 
   res.status(statusCode).json({
     success: false,
-    message:
-      statusCode === 500 && process.env.NODE_ENV === 'production'
-        ? 'An unexpected error occurred'
-        : message,
+    message: safeErrorMessage(statusCode, message),
     errors,
   });
 };
 
-module.exports = { notFound, errorHandler };
+const safeErrorMessage = (statusCode, message, env = process.env) =>
+  statusCode === 500 && env.NODE_ENV === 'production'
+    ? 'An unexpected error occurred'
+    : message;
+
+module.exports = { notFound, errorHandler, safeErrorMessage };

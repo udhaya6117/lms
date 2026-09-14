@@ -57,10 +57,15 @@ const redactUri = (uri) => {
 
 const connectDb = async ({ skipSeed = false } = {}) => {
   mongoose.set('strictQuery', true);
+  if (mongoose.connection.readyState === 1) {
+    if (!skipSeed && shouldSeedOnEmpty()) await seedIfEmpty();
+    return mongoose.connection;
+  }
   const uri = process.env.MONGODB_URI;
   const forceMemory = process.env.USE_MEMORY_DB === 'true';
   const allowMemoryFallback =
-    forceMemory || (process.env.NODE_ENV !== 'production' && process.env.USE_MEMORY_DB !== 'false');
+    process.env.NODE_ENV !== 'production' &&
+    (forceMemory || process.env.USE_MEMORY_DB !== 'false');
 
   if (!forceMemory && uri) {
     try {

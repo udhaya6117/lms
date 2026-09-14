@@ -1,0 +1,15 @@
+{
+  "installCommand": "npm install --prefix backend --omit=dev && npm install --prefix frontend",
+  "buildCommand": "CI=false npm run build --prefix frontend",
+  "outputDirectory": "frontend/build",
+  "framework": null,
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "functions": {
+    "api/[[...path]].js": {
+      "maxDuration": 10,
+      "includeFiles": "backend/src/**"
+    }
+  }
+}

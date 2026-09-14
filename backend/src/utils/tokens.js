@@ -29,6 +29,7 @@ const newTokenId = () => crypto.randomUUID();
 const cookieSameSite = () => {
   const explicit = String(process.env.COOKIE_SAMESITE || '').toLowerCase();
   if (['lax', 'strict', 'none'].includes(explicit)) return explicit;
+  if (process.env.VERCEL) return 'lax';
   return process.env.NODE_ENV === 'production' ? 'none' : 'lax';
 };
 

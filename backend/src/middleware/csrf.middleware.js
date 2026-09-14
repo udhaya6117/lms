@@ -1,14 +1,14 @@
 const ApiError = require('../utils/ApiError');
 const { allowedOrigins } = require('../config/secrets');
 
-const originAllowed = (req) => {
-  const allowed = allowedOrigins();
+const originAllowed = (req, env = process.env) => {
+  const allowed = allowedOrigins(env);
   const origin = req.get('Origin');
   const referer = req.get('Referer');
 
   if (origin) return allowed.includes(origin);
   if (referer) return allowed.some((base) => referer.startsWith(base));
-  return process.env.NODE_ENV !== 'production';
+  return env.NODE_ENV !== 'production';
 };
 
 const cookieCsrfGuard = (req, _res, next) => {

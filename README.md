@@ -57,6 +57,57 @@ Create React App proxies `/api` to the backend. Keep both processes running.
 
 Change JWT secrets in the environment before any real deployment. Production refuses to start with the example secrets.
 
+## Deploy on Vercel (free, no domain)
+
+The UI and API share one `https://….vercel.app` URL so login cookies and `/api` calls work the same as on localhost. You do not need a paid domain.
+
+### 1. Atlas (already free)
+
+In [MongoDB Atlas](https://cloud.mongodb.com) → Network Access → add `0.0.0.0/0` (Vercel IPs change). Copy your `MONGODB_URI`. Seed locally once (`cd backend && npm run seed`) so Vercel does **not** have to create 80 bcrypt users on a 10-second function.
+
+### 2. Create two JWT secrets
+
+On your PC:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Use one line as `JWT_ACCESS_SECRET` and the other as `JWT_REFRESH_SECRET`. They must be different.
+
+### 3. Import the GitHub repo
+
+1. Open [https://vercel.com/signup](https://vercel.com/signup) and continue with **GitHub** (Hobby / free).
+2. **Add New… → Project** → import `udhaya6117/lms`.
+3. Leave **Root Directory** empty (the repo root).
+4. Framework Preset: **Other**.
+5. Before you click Deploy, open **Environment Variables** and add:
+
+| Name | Value |
+|------|--------|
+| `NODE_ENV` | `production` |
+| `MONGODB_URI` | your Atlas URI |
+| `JWT_ACCESS_SECRET` | first generated secret |
+| `JWT_REFRESH_SECRET` | second generated secret |
+| `COOKIE_SAMESITE` | `lax` |
+| `SEED_ON_EMPTY` | `false` |
+| `USE_MEMORY_DB` | `false` |
+
+Vercel sets `VERCEL_URL` for you, so CORS/CSRF work without a custom `CLIENT_ORIGIN`.
+
+6. Click **Deploy**. Wait for the build to go green.
+7. Open the `.vercel.app` URL. Login with the seeded demo accounts.
+
+### 4. If login fails
+
+- Atlas Network Access must allow `0.0.0.0/0`.
+- Secrets must be 32+ characters and not the `.env.example` placeholders.
+- Check the Vercel deployment → **Logs** for `MongoDB connected` or a blocked-secrets error.
+- After the first successful deploy, optional: set `CLIENT_ORIGIN` to `https://your-project.vercel.app` and redeploy.
+
+Local `npm start` is unchanged. The CRA proxy still talks to `localhost:5000`.
+
 ### Demo accounts (local seed only)
 
 These logins exist so reviewers can walk the app after `npm run seed`. They are **not** production credentials. Override them with `SEED_ADMIN_PASSWORD`, `SEED_TRAINER_PASSWORD`, and `SEED_STUDENT_PASSWORD` in `backend/.env`. Production will not auto-seed unless `SEED_ON_EMPTY=true` **and** those passwords are no longer the demo defaults. Seed scripts do not print passwords when `NODE_ENV=production`.
