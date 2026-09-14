@@ -1,12 +1,39 @@
 require('dotenv').config();
 
-const { assertProductionSecrets } = require('../backend/src/config/secrets');
-const connectDb = require('../backend/src/config/db');
-const app = require('../backend/src/app');
+let loadError;
+let assertProductionSecrets;
+let connectDb;
+let app;
+
+try {
+  ({ assertProductionSecrets } = require('../backend/src/config/secrets'));
+  connectDb = require('../backend/src/config/db');
+  app = require('../backend/src/app');
+} catch (err) {
+  loadError = err;
+  console.error('Vercel API failed to load', err);
+}
 
 let ready;
 
+const sendError = (res, err) => {
+  if (res.headersSent) return;
+  res.statusCode = 500;
+  res.setHeader('Content-Type', 'application/json');
+  res.end(
+    JSON.stringify({
+      success: false,
+      message: err.message || 'API failed to start',
+    })
+  );
+};
+
 module.exports = async (req, res) => {
+  if (loadError) {
+    sendError(res, loadError);
+    return;
+  }
+
   try {
     assertProductionSecrets();
     if (!ready) {
@@ -16,15 +43,6 @@ module.exports = async (req, res) => {
     return app(req, res);
   } catch (err) {
     console.error('Vercel API failed', err);
-    if (!res.headersSent) {
-      res.statusCode = 500;
-      res.setHeader('Content-Type', 'application/json');
-      res.end(
-        JSON.stringify({
-          success: false,
-          message: err.message || 'API failed to start',
-        })
-      );
-    }
+    sendError(res, err);
   }
 };

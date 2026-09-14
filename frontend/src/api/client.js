@@ -19,6 +19,9 @@ async function parseJson(res) {
         'API is not running. Start the backend with npm run dev in the backend folder.'
       );
     }
+    if (/FUNCTION_INVOCATION_FAILED|INTERNAL_SERVER_ERROR/i.test(text)) {
+      throw new Error('The API is starting or crashed on the host. Wait a few seconds and try again.');
+    }
     throw new Error('The server returned an invalid response. Is the backend running?');
   }
 }

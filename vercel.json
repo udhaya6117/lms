@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install --prefix backend --omit=dev && npm install --prefix frontend",
+  "installCommand": "npm install --omit=dev && npm install --prefix frontend",
   "buildCommand": "CI=false npm run build --prefix frontend",
   "outputDirectory": "frontend/build",
   "framework": null,
